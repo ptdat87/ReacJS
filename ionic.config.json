@@ -1,0 +1,7 @@
+{
+  "name": "ReactJSLearn",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
