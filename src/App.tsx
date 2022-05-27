@@ -12,10 +12,10 @@ import {
   IonLabel,
   IonInput,
   setupIonicReact,
-  IonCard,
-  IonCardContent,
+  IonAlert,
 } from "@ionic/react";
 import BimControls from "./components/BmiControls";
+import BmiResult from "./components/BmiResult";
 
 /* Core CSS required for Ionic components to work properly */
 import "@ionic/react/css/core.css";
@@ -36,10 +36,12 @@ import "@ionic/react/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 
+
 setupIonicReact();
 
 const App: React.FC = () => {
   const [calculatedBmi, setCalculatedBmi] = useState<number>(); 
+  const [error, setError] = useState<string>();
 
   const weightInputRef  = useRef<HTMLIonInputElement>(null);
   const heightInputRef  = useRef<HTMLIonInputElement>(null);
@@ -47,17 +49,34 @@ const App: React.FC = () => {
   const calculateBMI = () => {
     const enteredWeight = weightInputRef.current!.value;
     const enteredHeight = heightInputRef.current!.value;
-    if(!enteredHeight || !enteredWeight)
-    {
+    if (
+      !enteredHeight ||
+      !enteredWeight ||
+      +enteredWeight <= 0 ||
+      +enteredHeight <= 0
+    ) {
+      setError('Please enter a valid (non-negatite) input number.');
       return;
     }
     const bmi = +enteredWeight /(+enteredHeight* +enteredHeight);
     setCalculatedBmi(bmi);
     console.log(bmi)
   };
-  const resetInputs = () => {};
+  
+  const resetInputs = () => {
+    weightInputRef.current!.value = '';
+    heightInputRef.current!.value = '';
+  };
+
+  const clearError = () =>{
+    setError(''); 
+  }
 
   return(
+    <React.Fragment>
+    <IonAlert isOpen={!!error} message={error} buttons={[
+      {text: 'Okay', handler: clearError }
+    ]}/>
     <IonApp>
     <IonHeader>
       <IonToolbar>
@@ -70,7 +89,7 @@ const App: React.FC = () => {
           <IonCol>
             <IonItem>
               <IonLabel position="floating">Your Height</IonLabel>
-              <IonInput ref={heightInputRef}> </IonInput>
+              <IonInput type='number' ref={heightInputRef}> </IonInput>
             </IonItem>
           </IonCol>
         </IonRow>
@@ -78,24 +97,17 @@ const App: React.FC = () => {
           <IonCol>
             <IonItem>
               <IonLabel position="floating">Your Weight</IonLabel>
-              <IonInput ref={weightInputRef}> </IonInput>
+              <IonInput type='number' ref={weightInputRef}> </IonInput>
             </IonItem>
           </IonCol>
         </IonRow>
        
         <BimControls onCalculate={calculateBMI} onReset={resetInputs}/>
-        {calculatedBmi && (<IonRow>
-          <IonCol>
-            <IonCard>
-              <IonCardContent>
-                <h2>{calculatedBmi}</h2>
-              </IonCardContent>
-            </IonCard>
-          </IonCol>
-        </IonRow>)}
+        {calculatedBmi && (<BmiResult result={calculatedBmi}/>)}
       </IonGrid>
     </IonContent>
   </IonApp>
+  </React.Fragment>
   )
  
   };
