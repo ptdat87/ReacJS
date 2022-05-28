@@ -13,7 +13,6 @@ import {
   IonInput,
   setupIonicReact,
   IonAlert,
-  IonButton,
 } from "@ionic/react";
 import BimControls from "./components/BmiControls";
 import BmiResult from "./components/BmiResult";
@@ -62,7 +61,12 @@ const App: React.FC = () => {
       setError('Please enter a valid (non-negatite) input number.');
       return;
     }
-    const bmi = +enteredWeight /(+enteredHeight* +enteredHeight);
+
+    const weightConversionFactor = calUnits === 'ftlbs' ? 2.2 : 1 ;
+    const heightConversionFactor = calUnits === 'ftlbs' ? 3.28 : 1 ;
+    const weight = +enteredWeight / weightConversionFactor;
+    const height = +enteredHeight / heightConversionFactor;
+    const bmi = weight /(height * height);
     setCalculatedBmi(bmi);
     console.log(bmi)
   };
@@ -75,6 +79,10 @@ const App: React.FC = () => {
   const clearError = () =>{
     setError(''); 
   }
+
+  const selectCalcUnitHandler = (selectedValue: 'mkg' | 'ftlbs') => {
+    setcalUnits(selectedValue);
+  };
 
   return(
     <React.Fragment>
@@ -91,13 +99,13 @@ const App: React.FC = () => {
       <IonGrid>
       <IonRow>
           <IonCol>
-            <InputControl selectedValue={calUnits}/>
+            <InputControl selectedValue={calUnits} onSelectValue={selectCalcUnitHandler}/>
           </IonCol>
         </IonRow>
         <IonRow>
           <IonCol>
             <IonItem>
-              <IonLabel position="floating">Your Height</IonLabel>
+              <IonLabel position="floating">Your Height ({calUnits==='mkg'?'meters':'feet'})</IonLabel>
               <IonInput type='number' ref={heightInputRef}> </IonInput>
             </IonItem>
           </IonCol>
@@ -105,7 +113,7 @@ const App: React.FC = () => {
         <IonRow>
           <IonCol>
             <IonItem>
-              <IonLabel position="floating">Your Weight</IonLabel>
+              <IonLabel position="floating">Your Weight ({calUnits==='mkg'?'kg':'lbs'})</IonLabel>
               <IonInput type='number' ref={weightInputRef}> </IonInput>
             </IonItem>
           </IonCol>
